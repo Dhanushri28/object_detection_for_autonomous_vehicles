@@ -29,7 +29,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # Initialize YOLOv8 model
-model = YOLO('yolov8s.pt')
+model = YOLO('yolov8m.pt')
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -109,7 +109,10 @@ def draw_detections(image, results):
             
             cv2.rectangle(annotated_image, (x1, y1), (x2, y2), color, thickness)
             
-            label = f"{class_name} {confidence:.2f}"
+            # --- THIS IS THE CHANGED LINE ---
+            label = f"{class_name} {int(confidence * 100)}%"
+            # --- END OF CHANGE ---
+
             if distance:
                 label += f" | {distance}m"
                 if alert_level == 'critical':
@@ -129,7 +132,6 @@ def draw_detections(image, results):
             })
     
     return annotated_image, detections
-
 class DetectionLog(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
